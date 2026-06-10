@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CasaViva — Affitti</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#FAFAF8;--night:#1A2744;--sage:#4A7C6F;--sl:#EBF2F0;
+  --stone:#8C8A84;--terra:#C8613A;
+  --w:#FFFFFF;--br:#E8E6E1;
+  --sh:0 4px 24px rgba(26,39,68,.10);--shl:0 12px 48px rgba(26,39,68,.18);
+}
+html,body{height:100%;font-family:'Inter',sans-serif;background:var(--bg);color:var(--night);overflow:hidden}
+
+header{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--w);border-bottom:1px solid var(--br);padding:0 14px;height:58px;display:flex;align-items:center;gap:10px;box-shadow:0 2px 10px rgba(26,39,68,.06)}
+.logo{font-family:'Playfair Display',serif;font-size:19px;font-weight:700;white-space:nowrap}.logo span{color:var(--terra)}
+.sbar{display:flex;align-items:center;gap:7px;background:var(--bg);border:1.5px solid var(--br);border-radius:40px;padding:6px 13px;flex:1;transition:border-color .2s,box-shadow .2s}
+.sbar:focus-within{border-color:var(--sage);box-shadow:0 0 0 3px rgba(74,124,111,.12)}
+.sbar input{flex:1;border:none;background:transparent;font-family:'Inter',sans-serif;font-size:14px;color:var(--night);outline:none}
+.sbar input::placeholder{color:var(--stone)}
+.sbtn{background:var(--sage);color:#fff;border:none;border-radius:50%;width:27px;height:27px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
+.gbtn{background:none;border:1.5px solid var(--br);border-radius:40px;padding:6px 11px;display:flex;align-items:center;gap:5px;font-size:13px;font-weight:500;color:var(--sage);cursor:pointer;white-space:nowrap;flex-shrink:0;transition:all .2s}
+.gbtn:hover{background:var(--sl);border-color:var(--sage)}
+.gbtn:disabled{opacity:.6;pointer-events:none}
+
+main{display:flex;height:calc(100vh - 58px);margin-top:58px}
+
+.sidebar{width:330px;flex-shrink:0;background:var(--w);border-right:1px solid var(--br);overflow-y:auto;display:flex;flex-direction:column}
+.sidebar::-webkit-scrollbar{width:3px}.sidebar::-webkit-scrollbar-thumb{background:var(--br)}
+
+.flt{padding:11px 13px;border-bottom:1px solid var(--br);display:flex;gap:6px;flex-wrap:wrap}
+.chip{padding:5px 10px;border-radius:20px;border:1.5px solid var(--br);font-size:12px;font-weight:500;cursor:pointer;background:var(--w);color:var(--stone);transition:all .15s;white-space:nowrap}
+.chip:hover{border-color:var(--sage);color:var(--sage)}.chip.on{background:var(--sage);border-color:var(--sage);color:#fff}
+
+.rh{padding:9px 13px 5px;font-size:12px;color:var(--stone)}.rh strong{color:var(--night);font-weight:600}
+
+.card{margin:5px 9px;border-radius:11px;border:1.5px solid var(--br);overflow:hidden;cursor:pointer;transition:all .2s;background:var(--w)}
+.card:hover{border-color:var(--sage);box-shadow:var(--sh);transform:translateY(-1px)}.card.sel{border-color:var(--terra);box-shadow:0 0 0 3px rgba(200,97,58,.12)}
+.ci{position:relative;height:135px;background:#e8e4dc;overflow:hidden}.ci img{width:100%;height:100%;object-fit:cover}
+.cbg{position:absolute;top:7px;left:7px;background:#fff;border-radius:5px;padding:3px 6px;font-size:10px;font-weight:600;color:var(--terra);text-transform:uppercase;letter-spacing:.3px}
+.cfv{position:absolute;top:7px;right:7px;background:rgba(255,255,255,.9);border:none;border-radius:50%;width:28px;height:28px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px}
+.cb{padding:9px 11px 11px}
+.cp{font-family:'Playfair Display',serif;font-size:19px;font-weight:700;line-height:1}.cp span{font-family:'Inter',sans-serif;font-size:11px;font-weight:400;color:var(--stone)}
+.ct{font-size:12px;font-weight:600;margin:4px 0 1px;line-height:1.3}
+.cl{font-size:11px;color:var(--stone)}
+.ctg{display:flex;gap:4px;margin-top:7px;flex-wrap:wrap}
+.tag{font-size:10px;font-weight:500;background:var(--sl);color:var(--sage);padding:2px 6px;border-radius:4px}
+.tag.mq{background:#F0EEFE;color:#6358C4}
+
+#ma{flex:1;position:relative;overflow:hidden}
+#mc{width:100%;height:100%;display:block}
+#mo{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+
+.pm{background:var(--night);color:#fff;font-family:'Inter',sans-serif;font-size:11px;font-weight:600;padding:4px 8px;border-radius:14px;white-space:nowrap;cursor:pointer;box-shadow:0 2px 8px rgba(26,39,68,.25);transition:all .15s;user-select:none;border:2px solid transparent;position:absolute;transform:translate(-50%,-50%);pointer-events:all;z-index:10}
+.pm:hover,.pm.sel{background:var(--terra);transform:translate(-50%,-50%) scale(1.1);box-shadow:0 4px 14px rgba(200,97,58,.35)}
+
+.pop{position:absolute;z-index:50;background:#fff;border-radius:11px;box-shadow:var(--shl);width:210px;overflow:hidden;animation:pi .2s ease;display:none}
+@keyframes pi{from{opacity:0;transform:scale(.93) translateY(5px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.pop-img{width:100%;height:95px;object-fit:cover}
+.pop-body{padding:9px 11px}
+.pop-pr{font-family:'Playfair Display',serif;font-size:17px;font-weight:700}.pop-pr span{font-family:'Inter',sans-serif;font-size:10px;font-weight:400;color:var(--stone)}
+.pop-ti{font-size:11px;font-weight:600;margin:3px 0 1px}
+.pop-lo{font-size:10px;color:var(--stone);margin-bottom:7px}
+.pop-btn{display:block;text-align:center;background:var(--terra);color:#fff;border:none;border-radius:6px;padding:6px;font-family:'Inter',sans-serif;font-size:11px;font-weight:600;cursor:pointer;width:100%}
+.pop-x{position:absolute;top:5px;right:5px;background:rgba(255,255,255,.9);border:none;border-radius:50%;width:20px;height:20px;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center}
+
+.zc{position:absolute;bottom:18px;right:14px;z-index:50;display:flex;flex-direction:column;gap:4px}
+.zb{background:#fff;border:1px solid var(--br);border-radius:7px;width:34px;height:34px;font-size:17px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:var(--sh);color:var(--night);line-height:1}
+.zb:hover{background:var(--sl)}
+
+#toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--night);color:#fff;padding:9px 16px;border-radius:40px;font-size:12px;font-weight:500;box-shadow:var(--shl);z-index:200;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap}
+#toast.on{opacity:1}
+
+#ov{position:fixed;inset:0;z-index:300;background:rgba(26,39,68,.5);backdrop-filter:blur(3px);display:none;align-items:flex-end;justify-content:center}
+#ov.open{display:flex}
+.modal{background:#fff;width:100%;max-width:520px;border-radius:18px 18px 0 0;max-height:80vh;overflow-y:auto;animation:su .28s ease}
+@keyframes su{from{transform:translateY(45px);opacity:0}to{transform:translateY(0);opacity:1}}
+.mh{width:34px;height:4px;background:var(--br);border-radius:2px;margin:9px auto 0}
+.mi{width:100%;height:190px;object-fit:cover;margin-top:11px}
+.mb{padding:16px 18px 30px}
+.mpr{font-family:'Playfair Display',serif;font-size:26px;font-weight:700}.mpr span{font-family:'Inter',sans-serif;font-size:13px;font-weight:400;color:var(--stone)}
+.mti{font-size:16px;font-weight:600;margin:4px 0 3px}
+.mlo{font-size:12px;color:var(--stone);margin-bottom:13px}
+.mst{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:13px}
+.st{background:var(--bg);border-radius:9px;padding:9px;text-align:center}
+.sv{font-size:19px;font-weight:700}.sl{font-size:10px;color:var(--stone);font-weight:500;text-transform:uppercase;letter-spacing:.3px}
+.mde{font-size:13px;color:#555;line-height:1.6;margin-bottom:16px}
+.mct{display:flex;gap:7px}
+.b1{flex:1;background:var(--terra);color:#fff;border:none;border-radius:9px;padding:12px;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer}
+.b2{background:var(--bg);border:1.5px solid var(--br);border-radius:9px;padding:12px 15px;font-family:'Inter',sans-serif;font-size:13px;color:var(--night);cursor:pointer}
+
+.sp{width:13px;height:13px;border-radius:50%;border:2px solid rgba(74,124,111,.3);border-top-color:var(--sage);animation:spin .7s linear infinite;display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+@media(max-width:660px){.sidebar{display:none}.geo-lbl{display:none}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Casa<span>Viva</span></div>
+  <div class="sbar">
+    <svg width="13" height="13" fill="none" stroke="#8C8A84" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    <input type="text" id="si" placeholder="Cerca zona, città…">
+    <button class="sbtn" onclick="doSearch()">
+      <svg width="12" height="12" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    </button>
+  </div>
+  <button class="gbtn" id="gb" onclick="geoLocate()">
+    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
+    <span class="geo-lbl">Vicino a me</span>
+  </button>
+</header>
+
+<main>
+  <div class="sidebar">
+    <div class="flt" id="flt">
+      <button class="chip on" data-f="all">Tutti</button>
+      <button class="chip" data-f="monolocale">Mono</button>
+      <button class="chip" data-f="bilocale">Bilo</button>
+      <button class="chip" data-f="trilocale">Trilo</button>
+      <button class="chip" data-f="arredato">Arredato</button>
+      <button class="chip" data-f="animali">🐾 Animali</button>
+    </div>
+    <div class="rh">Trovati <strong id="cnt">6</strong> annunci</div>
+    <div id="cl"></div>
+  </div>
+  <div id="ma">
+    <canvas id="mc"></canvas>
+    <div id="mo"></div>
+    <div class="pop" id="pop">
+      <button class="pop-x" id="popx">✕</button>
+      <img class="pop-img" id="pop-img" src="" alt="">
+      <div class="pop-body">
+        <div class="pop-pr" id="pop-pr"></div>
+        <div class="pop-ti" id="pop-ti"></div>
+        <div class="pop-lo" id="pop-lo"></div>
+        <button class="pop-btn" id="pop-btn">Vedi dettaglio →</button>
+      </div>
+    </div>
+    <div class="zc">
+      <button class="zb" onclick="doZoom(1)">+</button>
+      <button class="zb" onclick="doZoom(-1)">−</button>
+    </div>
+  </div>
+</main>
+
+<div id="toast"></div>
+
+<div id="ov" onclick="closeModal(event)">
+  <div class="modal">
+    <div class="mh"></div>
+    <img class="mi" id="mi" src="" alt="">
+    <div class="mb">
+      <div class="mpr" id="mpr"></div>
+      <div class="mti" id="mti"></div>
+      <div class="mlo" id="mlo"></div>
+      <div class="mst" id="mst"></div>
+      <p class="mde" id="mde"></p>
+      <div class="mct">
+        <button class="b1">📞 Contatta l'agenzia</button>
+        <button class="b2">♡</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const DATA=[
+  {id:1,title:"Bilocale luminoso con balcone",zone:"Isola, Milano",lat:45.492,lng:9.192,price:1200,type:"bilocale",mq:58,rooms:2,floor:"3° piano",img:"https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=480&q=75",desc:"Appartamento ristrutturato in zona Isola. Cucina separata, doppi servizi, condominio tranquillo. Disponibile subito.",tags:["Arredato","Balcone"],badge:"Nuovo",animals:true},
+  {id:2,title:"Monolocale Brera",zone:"Brera, Milano",lat:45.472,lng:9.182,price:900,type:"monolocale",mq:32,rooms:1,floor:"2° piano",img:"https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=480&q=75",desc:"Monolocale arredato nel cuore di Brera, vicinissimo ai mezzi pubblici. Ideale per professionisti.",tags:["Arredato","Metro"],badge:"",animals:false},
+  {id:3,title:"Trilocale terrazzo panoramico",zone:"Porta Romana, Milano",lat:45.456,lng:9.203,price:1800,type:"trilocale",mq:95,rooms:3,floor:"5° piano",img:"https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=480&q=75",desc:"Ampio trilocale con bellissimo terrazzo sulla città. Box auto incluso nel prezzo.",tags:["Terrazzo","Box"],badge:"",animals:false},
+  {id:4,title:"Bilocale Navigli vista canale",zone:"Navigli, Milano",lat:45.449,lng:9.173,price:1350,type:"bilocale",mq:55,rooms:2,floor:"1° piano",img:"https://images.unsplash.com/photo-1484154218962-a197022b5858?w=480&q=75",desc:"Romantico bilocale con vista diretta sul Naviglio Grande. Zona vivacissima.",tags:["Vista canale"],badge:"Nuovo",animals:true},
+  {id:5,title:"Monolocale ristrutturato",zone:"Lambrate, Milano",lat:45.484,lng:9.243,price:750,type:"monolocale",mq:28,rooms:1,floor:"PT",img:"https://images.unsplash.com/photo-1493809842364-78817add7ffb?w=480&q=75",desc:"Completamente ristrutturato con materiali di pregio. Pronto a entrare!",tags:["Ristrutturato"],badge:"",animals:true},
+  {id:6,title:"Quadrilocale liberty",zone:"Porta Venezia, Milano",lat:45.476,lng:9.214,price:2400,type:"trilocale",mq:130,rooms:4,floor:"2° piano",img:"https://images.unsplash.com/photo-1464082354059-27db6ce50048?w=480&q=75",desc:"Appartamento di pregio in stabile liberty del 1932. Soffitti a 3.5m, parquet originale.",tags:["Liberty","Riscaldamento auto"],badge:"",animals:false},
+];
+
+let filtered=[...DATA],activeF='all',selId=null,userPos=null;
+const BBOX={minLat:43.0,maxLat:47.0,minLng:7.0,maxLng:12.5}; // Italy bounds, will auto-fit
+
+const canvas=document.getElementById('mc');
+const ctx=canvas.getContext('2d');
+const ma=document.getElementById('ma');
+const mo=document.getElementById('mo');
+
+// Compute tight bbox from data
+function computeBbox(){
+  const lats=DATA.map(d=>d.lat),lngs=DATA.map(d=>d.lng);
+  const pad=0.025;
+  return{minLat:Math.min(...lats)-pad,maxLat:Math.max(...lats)+pad,minLng:Math.min(...lngs)-pad,maxLng:Math.max(...lngs)+pad};
+}
+const BB=computeBbox();
+
+let vScale=1,vOX=0,vOY=0;
+
+function resize(){
+  canvas.width=ma.offsetWidth;
+  canvas.height=ma.offsetHeight;
+  drawMap();placeMarkers();
+}
+
+function ll2xy(lat,lng){
+  const W=canvas.width,H=canvas.height;
+  const bx=(lng-BB.minLng)/(BB.maxLng-BB.minLng)*W;
+  const by=(1-(lat-BB.minLat)/(BB.maxLat-BB.minLat))*H;
+  const cx=W/2,cy=H/2;
+  return{x:cx+(bx-cx+vOX)*vScale,y:cy+(by-cy+vOY)*vScale};
+}
+
+function drawMap(){
+  if(!canvas.width)return;
+  const W=canvas.width,H=canvas.height;
+  ctx.clearRect(0,0,W,H);
+
+  // Background
+  ctx.fillStyle='#ede9e0';ctx.fillRect(0,0,W,H);
+
+  // Grid of city blocks
+  ctx.fillStyle='#e2ddd3';
+  const gc=20,gr=16;
+  for(let c=0;c<gc;c++)for(let r=0;r<gr;r++){
+    const p=3;
+    ctx.beginPath();
+    ctx.roundRect(c*(W/gc)+p,r*(H/gr)+p,W/gc-p*2,H/gr-p*2,3);
+    ctx.fill();
+  }
+
+  // Parks
+  ctx.fillStyle='#c3d9ba';
+  const parks=[[45.488,9.193,0.009,0.013],[45.476,9.183,0.005,0.008],[45.462,9.211,0.006,0.009]];
+  parks.forEach(([lat,lng,dlat,dlng])=>{
+    const a=ll2xy(lat,lng),b=ll2xy(lat-dlat,lng+dlng);
+    ctx.beginPath();ctx.roundRect(a.x,a.y,b.x-a.x,b.y-a.y,4);ctx.fill();
+  });
+
+  // Water – Navigli
+  ctx.strokeStyle='#a9c8e0';ctx.lineWidth=4*vScale;ctx.lineCap='round';
+  const nav=[[45.453,9.163],[45.449,9.175],[45.446,9.190],[45.443,9.207]];
+  ctx.beginPath();
+  const n0=ll2xy(nav[0][0],nav[0][1]);ctx.moveTo(n0.x,n0.y);
+  nav.slice(1).forEach(p=>{const q=ll2xy(p[0],p[1]);ctx.lineTo(q.x,q.y)});
+  ctx.stroke();
+
+  // Main roads
+  ctx.strokeStyle='#fff';ctx.lineWidth=3.5*vScale;ctx.lineCap='round';
+  const roads=[[45.435,9.17,45.505,9.215],[45.47,9.155,45.47,9.255],[45.445,9.175,45.505,9.195],[45.48,9.165,45.455,9.235],[45.455,9.16,45.455,9.255]];
+  roads.forEach(([la,lo,lb,lr])=>{const a=ll2xy(la,lo),b=ll2xy(lb,lr);ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke()});
+
+  // Secondary grid
+  ctx.strokeStyle='rgba(255,255,255,0.55)';ctx.lineWidth=1.2*vScale;
+  for(let i=0;i<12;i++){
+    const la=BB.minLat+i*(BB.maxLat-BB.minLat)/12;
+    const a=ll2xy(la,BB.minLng),b=ll2xy(la,BB.maxLng);
+    ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();
+  }
+  for(let j=0;j<16;j++){
+    const lo=BB.minLng+j*(BB.maxLng-BB.minLng)/16;
+    const a=ll2xy(BB.minLat,lo),b=ll2xy(BB.maxLat,lo);
+    ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();
+  }
+
+  // City label
+  ctx.fillStyle='rgba(26,39,68,.18)';
+  ctx.font=`bold ${Math.round(14*vScale)}px Inter,sans-serif`;
+  ctx.textAlign='center';
+  const ctr=ll2xy(45.468,9.200);
+  ctx.fillText('MILANO',ctr.x,ctr.y);
+
+  // User dot
+  if(userPos){
+    const u=ll2xy(userPos.lat,userPos.lng);
+    ctx.beginPath();ctx.arc(u.x,u.y,9,0,Math.PI*2);
+    ctx.fillStyle='rgba(74,124,111,.2)';ctx.fill();
+    ctx.beginPath();ctx.arc(u.x,u.y,5,0,Math.PI*2);
+    ctx.fillStyle='#4A7C6F';ctx.strokeStyle='#fff';ctx.lineWidth=2;
+    ctx.fill();ctx.stroke();
+  }
+}
+
+function placeMarkers(){
+  mo.innerHTML='';
+  filtered.forEach(l=>{
+    const{x,y}=ll2xy(l.lat,l.lng);
+    const d=document.createElement('div');
+    d.className='pm'+(selId===l.id?' sel':'');
+    d.textContent='€'+(l.price>=1000?(l.price/1000).toFixed(1)+'k':l.price);
+    d.style.left=x+'px';d.style.top=y+'px';
+    d.addEventListener('click',()=>selectListing(l.id));
+    mo.appendChild(d);
+  });
+}
+
+function selectListing(id){
+  selId=id;
+  const l=DATA.find(x=>x.id===id);
+  const W=canvas.width,H=canvas.height;
+  const rawX=(l.lng-BB.minLng)/(BB.maxLng-BB.minLng)*W;
+  const rawY=(1-(l.lat-BB.minLat)/(BB.maxLat-BB.minLat))*H;
+  animatePan(W/2-rawX,H/2-rawY);
+  renderCards();
+  showPopup(l);
+  setTimeout(()=>{
+    const cards=document.querySelectorAll('.card');
+    const idx=filtered.findIndex(x=>x.id===id);
+    if(cards[idx])cards[idx].scrollIntoView({behavior:'smooth',block:'center'});
+  },80);
+}
+
+function animatePan(tx,ty,steps=14){
+  const ox=vOX,oy=vOY;let s=0;
+  function step(){
+    s++;const t=s/steps;const e=1-Math.pow(1-t,3);
+    vOX=ox+(tx-ox)*e;vOY=oy+(ty-oy)*e;
+    drawMap();placeMarkers();
+    if(s<steps)requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+function showPopup(l){
+  const pop=document.getElementById('pop');
+  const{x,y}=ll2xy(l.lat,l.lng);
+  document.getElementById('pop-img').src=l.img;
+  document.getElementById('pop-pr').innerHTML=`€${l.price.toLocaleString('it-IT')} <span>/mese</span>`;
+  document.getElementById('pop-ti').textContent=l.title;
+  document.getElementById('pop-lo').textContent=`📍 ${l.zone} · ${l.mq}m²`;
+  document.getElementById('pop-btn').onclick=()=>openModal(l.id);
+  const W=canvas.width;
+  let px=x+10,py=y-170;
+  if(px+215>W)px=x-225;
+  if(py<10)py=y+20;
+  pop.style.left=px+'px';pop.style.top=py+'px';pop.style.display='block';
+}
+
+document.getElementById('popx').onclick=()=>{
+  document.getElementById('pop').style.display='none';
+  selId=null;renderCards();placeMarkers();
+};
+
+function openModal(id){
+  const l=DATA.find(x=>x.id===id);
+  document.getElementById('mi').src=l.img;
+  document.getElementById('mpr').innerHTML=`€${l.price.toLocaleString('it-IT')} <span>/mese</span>`;
+  document.getElementById('mti').textContent=l.title;
+  document.getElementById('mlo').textContent=`📍 ${l.zone} · ${l.floor}`;
+  document.getElementById('mst').innerHTML=`<div class="st"><div class="sv">${l.mq}</div><div class="sl">m²</div></div><div class="st"><div class="sv">${l.rooms}</div><div class="sl">Locali</div></div><div class="st"><div class="sv">${l.animals?'✓':'✗'}</div><div class="sl">Animali</div></div>`;
+  document.getElementById('mde').textContent=l.desc;
+  document.getElementById('ov').classList.add('open');
+}
+
+function closeModal(e){if(e.target===document.getElementById('ov'))document.getElementById('ov').classList.remove('open')}
+
+function renderCards(){
+  const cl=document.getElementById('cl');cl.innerHTML='';
+  filtered.forEach(l=>{
+    const d=document.createElement('div');
+    d.className='card'+(selId===l.id?' sel':'');
+    d.innerHTML=`<div class="ci"><img src="${l.img}" alt="" loading="lazy">${l.badge?`<div class="cbg">${l.badge}</div>`:''}<button class="cfv" onclick="event.stopPropagation();this.textContent=this.textContent==='♡'?'❤️':'♡'">♡</button></div><div class="cb"><div class="cp">€${l.price.toLocaleString('it-IT')} <span>/mese</span></div><div class="ct">${l.title}</div><div class="cl">📍 ${l.zone}</div><div class="ctg"><span class="tag mq">${l.mq}m²</span><span class="tag">${l.rooms} ${l.rooms===1?'locale':'locali'}</span>${l.tags[0]?`<span class="tag">${l.tags[0]}</span>`:''}</div></div>`;
+    d.addEventListener('click',()=>selectListing(l.id));
+    cl.appendChild(d);
+  });
+}
+
+document.getElementById('flt').addEventListener('click',e=>{
+  const c=e.target.closest('.chip');if(!c)return;
+  document.querySelectorAll('.chip').forEach(x=>x.classList.remove('on'));
+  c.classList.add('on');activeF=c.dataset.f;applyFilters();
+});
+
+function applyFilters(){
+  const q=document.getElementById('si').value.toLowerCase();
+  filtered=DATA.filter(l=>{
+    const mf=activeF==='all'||l.type===activeF||(activeF==='arredato'&&l.tags.includes('Arredato'))||(activeF==='animali'&&l.animals);
+    const ms=!q||l.title.toLowerCase().includes(q)||l.zone.toLowerCase().includes(q);
+    return mf&&ms;
+  });
+  selId=null;document.getElementById('pop').style.display='none';
+  document.getElementById('cnt').textContent=filtered.length;
+  renderCards();drawMap();placeMarkers();
+}
+
+function doSearch(){applyFilters()}
+document.getElementById('si').addEventListener('keydown',e=>{if(e.key==='Enter')doSearch()});
+
+function doZoom(dir){vScale=Math.max(0.5,Math.min(3.5,vScale+dir*0.3));drawMap();placeMarkers()}
+
+// Pan – mouse
+let drag=false,dx=0,dy=0,dox=0,doy=0;
+canvas.addEventListener('mousedown',e=>{drag=true;dx=e.clientX;dy=e.clientY;dox=vOX;doy=vOY;e.preventDefault()});
+window.addEventListener('mousemove',e=>{if(!drag)return;vOX=dox+(e.clientX-dx)/vScale;vOY=doy+(e.clientY-dy)/vScale;drawMap();placeMarkers()});
+window.addEventListener('mouseup',()=>drag=false);
+canvas.addEventListener('wheel',e=>{e.preventDefault();doZoom(e.deltaY<0?1:-1)},{passive:false});
+
+// Pan – touch
+let t0=null;
+canvas.addEventListener('touchstart',e=>{t0={x:e.touches[0].clientX,y:e.touches[0].clientY,ox:vOX,oy:vOY}},{passive:true});
+canvas.addEventListener('touchmove',e=>{if(!t0)return;vOX=t0.ox+(e.touches[0].clientX-t0.x)/vScale;vOY=t0.oy+(e.touches[0].clientY-t0.y)/vScale;drawMap();placeMarkers()},{passive:true});
+canvas.addEventListener('touchend',()=>t0=null);
+
+function showToast(msg,dur=3200){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('on');
+  setTimeout(()=>t.classList.remove('on'),dur);
+}
+
+function geoLocate(){
+  if(!navigator.geolocation){showToast('⚠️ Geolocalizzazione non supportata');return}
+  const btn=document.getElementById('gb');
+  btn.disabled=true;
+  btn.innerHTML='<span class="sp"></span>';
+  showToast('📍 Localizzazione in corso…',5000);
+  navigator.geolocation.getCurrentPosition(
+    pos=>{
+      userPos={lat:pos.coords.latitude,lng:pos.coords.longitude};
+      btn.disabled=false;
+      btn.innerHTML=`<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg><span class="geo-lbl">Vicino a me</span>`;
+      const W=canvas.width,H=canvas.height;
+      const rawX=(userPos.lng-BB.minLng)/(BB.maxLng-BB.minLng)*W;
+      const rawY=(1-(userPos.lat-BB.minLat)/(BB.maxLat-BB.minLat))*H;
+      animatePan(W/2-rawX,H/2-rawY);
+      vScale=1.5;
+      filtered.sort((a,b)=>Math.hypot(a.lat-userPos.lat,a.lng-userPos.lng)-Math.hypot(b.lat-userPos.lat,b.lng-userPos.lng));
+      renderCards();
+      showToast('✅ Posizione trovata! Annunci vicino a te');
+    },
+    err=>{
+      btn.disabled=false;
+      btn.innerHTML=`<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg><span class="geo-lbl">Vicino a me</span>`;
+      showToast(err.code===1?'⚠️ Permesso GPS negato':'⚠️ Posizione non disponibile');
+    },
+    {timeout:8000,maximumAge:60000}
+  );
+}
+
+window.addEventListener('resize',resize);
+resize();
+renderCards();
+</script>
+</body>
+</html>
